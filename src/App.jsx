@@ -240,13 +240,30 @@ function App() {
         );
         if (!res.ok) throw new Error("Could not get the data...");
         const data = await res.json();
+        const justifyData = data.result.records[0]["חומרים פעילים"]
+          .split(" ")
+          .map((element) => {
+            return /^[A-Za-z]+$/.test(element)
+              ? element
+              : element.includes("%")
+              ? +element.split("%")[0]
+              : null;
+          });
+        const dataToUse = justifyData.filter((el) => el !== null).sort();
+        const activeNums = dataToUse
+          .map((el) => (/^(0|[1-9]\d*)$/.test(el) ? el : ""))
+          .filter((el) => el !== "")
+          .sort((a, b) => b - a)
+          .join(", ");
+        const activeNames = dataToUse
+          .map((el) => (typeof el === "string" ? el : ""))
+          .filter((el) => el !== "")
+          .join(", ");
+
         setProductInfo({
           ...productInfo,
-          activeMaterialName:
-            data.result.records[0]["חומרים פעילים"].split(" ")[0],
-          activeMaterialLevel: +data.result.records[0]["חומרים פעילים"]
-            .split(" ")[2]
-            .split("%")[0],
+          activeMaterialName: activeNames,
+          activeMaterialLevel: activeNums,
         });
       } catch (error) {
         console.log(error);
@@ -266,11 +283,10 @@ function App() {
 
     setProductInfo({
       ...productInfo,
-      activeMaterialDilution: (
-        (+productInfo.activeMaterialLevel * 10) /
-        +productInfo.liters /
-        10
-      ).toFixed(2),
+      activeMaterialDilution: productInfo.activeMaterialLevel
+        .split(", ")
+        .map((el) => +((+el * 10) / +productInfo.liters / 10).toFixed(2))
+        .join(", "),
     });
   }, [productInfo.activeMaterialName, productInfo.liters]);
   function handleWarnings(e) {
