@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import SignatureCanvas from "react-signature-canvas";
+import { v4 as uuidv4 } from "uuid";
 import {
   Page,
   Text,
@@ -12,7 +13,7 @@ import {
 } from "@react-pdf/renderer";
 import rubikFont from "./fonts/Rubik-Bold.ttf";
 import rubikReg from "./fonts/Rubik-Medium.ttf";
-
+import exterminatorSign from "./assets/sign.png";
 import Section from "./ui/Section";
 import "./index.css";
 import MiniForm from "./ui/MiniForm";
@@ -36,7 +37,8 @@ const styles = StyleSheet.create({
     fontFamily: "Rubik",
   },
   title: {
-    fontSize: 18,
+    fontSize: 16,
+    textDecoration: "underline",
     textAlign: "center",
     marginBottom: 20,
   },
@@ -70,11 +72,25 @@ const styles = StyleSheet.create({
     left: 10,
     color: "grey",
   },
+  id: {
+    fontSize: 10,
+    position: "absolute",
+    top: 10,
+    right: 10,
+    color: "grey",
+  },
   section: {
     position: "absolute",
     display: "flex",
     left: 30,
-    bottom: 20,
+    bottom: 30,
+    margin: 5,
+  },
+  exterminatorSec: {
+    position: "absolute",
+    display: "flex",
+    right: 30,
+    bottom: 30,
     margin: 5,
   },
   customerSign: {
@@ -86,6 +102,13 @@ const styles = StyleSheet.create({
   info: {
     margin: 5,
   },
+  emergancy: {
+    position: "absolute",
+    bottom: 10,
+    left: 120,
+    fontSize: 10,
+    color: "grey",
+  },
 });
 
 function App() {
@@ -95,6 +118,7 @@ function App() {
         <Text style={styles.time}>
           {date} {time}
         </Text>
+        <Text style={styles.id}>{` ` + formId} :מספר מסמך</Text>
         <Text style={{ fontFamily: "Rubik" }}></Text>
         <Text style={styles.header}>
           {`"${exterminatorInfo.companyName}"
@@ -102,9 +126,9 @@ function App() {
           ${exterminatorInfo.name}
           `}
         </Text>
-        <Text style={styles.title}>אישור ביצוע הדברה</Text>
+        <Text style={styles.title}>הנדון: אישור ביצוע הדברה</Text>
         <View style={styles.info}>
-          <Text style={styles.subtitle}>להלן פרטי הלקוח</Text>
+          <Text style={styles.subtitle}>:להלן פרטי הלקוח</Text>
           <Text style={styles.text}>
             {`שם הלקוח: ${customerInfo.name}
           סוג הלקוח: ${
@@ -118,7 +142,7 @@ function App() {
           </Text>
         </View>
         <View style={styles.info}>
-          <Text style={styles.subtitle}>פירוט הממצאים</Text>
+          <Text style={styles.subtitle}>:פירוט הממצאים</Text>
           <Text style={styles.text}>{`המזיקים שנמצאו: ${insectsInfo.insectsType}
           רמת הנגיעות: ${insectsInfo.infectionLevel}
           פעולות מניעה: ${insectsInfo.preIdent}
@@ -126,7 +150,7 @@ function App() {
           `}</Text>
         </View>
         <View style={styles.info}>
-          <Text style={styles.subtitle}>פירוט דרכי הטיפול והחומרים:</Text>
+          <Text style={styles.subtitle}>:פירוט דרכי הטיפול והחומרים</Text>
           <Text
             style={styles.text}
           >{`שם תכשיר ההדברה: ${productInfo.productName}
@@ -135,18 +159,20 @@ function App() {
           ריכוז החומר הפעיל: ${productInfo.activeMaterialLevel}
           ריכוז החומר הפעיל לאחר דילול: ${productInfo.activeMaterialDilution}
           שיטת ביצוע ההדברה: ${productInfo.applicationMethod}
-          אזהרות שניתנו ללקוח בדבר הסיכונים הכרוכים בהדברה:
-          ${productInfo.warnings}
+          אזהרות שניתנו ללקוח בדבר הסיכונים הכרוכים בהדברה: ${productInfo.warnings}
           `}</Text>
         </View>
-        {/* <Text style={styles}></Text> */}
-        <Text style={styles.text}>
+        <Text style={styles.emergancy}>
           מספר הטלפון להתייעצות בנושאי הרעלות חדות (אקוטיות) הוא 04-7771900, 24
           שעות ביממה
         </Text>
         <View style={styles.section}>
           <Image style={styles.image} src={url} />
           <Text style={styles.customerSign}>חתימת הלקוח</Text>
+        </View>
+        <View style={styles.exterminatorSec}>
+          <Image style={styles.image} src={exterminatorSign} />
+          <Text style={styles.customerSign}>חתימת המבצע</Text>
         </View>
       </Page>
     </Document>
@@ -155,8 +181,8 @@ function App() {
   function getTime() {
     return new Date().toLocaleString("en-GB").slice(12, -3);
   }
+  const formId = uuidv4();
   const [isLoading, setIsLoading] = useState(false);
-  // const [error, setError] = useState("");
   const [sign, setSign] = useState();
   const [url, setUrl] = useState();
   const [date, setDate] = useState("");
