@@ -40,12 +40,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textDecoration: "underline",
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 25,
   },
   subtitle: {
     fontSize: 13,
     textAlign: "right",
-    marginBottom: 3,
+    marginBottom: 7,
     marginTop: 7,
   },
   text: {
@@ -53,6 +53,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontSize: 10,
     textAlign: "right",
+    lineHeight: 1.7,
   },
   image: {
     marginVertical: 5,
@@ -134,12 +135,6 @@ function App() {
             {exterminatorInfo.phone} | {exterminatorInfo.tel}
           </Text>
         </View>
-        {/* <Text style={styles.header}>
-          {`"${exterminatorInfo.companyName}"
-          
-          ${exterminatorInfo.name}
-          `}
-        </Text> */}
         <Text style={styles.title}>הנדון: אישור ביצוע הדברה</Text>
         <View style={styles.info}>
           <Text style={styles.subtitle}>:להלן פרטי הלקוח</Text>
