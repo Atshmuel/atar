@@ -57,11 +57,17 @@ const styles = StyleSheet.create({
   image: {
     marginVertical: 5,
     marginHorizontal: 5,
-    width: 70,
+    width: 60,
   },
   header: {
     fontSize: 13,
     marginBottom: 20,
+    textAlign: "center",
+    color: "grey",
+  },
+  headerSection: {
+    marginVertical: 10,
+    fontSize: 10,
     textAlign: "center",
     color: "grey",
   },
@@ -120,12 +126,20 @@ function App() {
         </Text>
         <Text style={styles.id}>{` ` + formId} :מספר מסמך</Text>
         <Text style={{ fontFamily: "Rubik" }}></Text>
-        <Text style={styles.header}>
+        <View style={styles.headerSection}>
+          <Text>{exterminatorInfo.companyName}</Text>
+          <Text>{exterminatorInfo.name}</Text>
+          <Text>{exterminatorInfo.email}</Text>
+          <Text>
+            {exterminatorInfo.phone} | {exterminatorInfo.tel}
+          </Text>
+        </View>
+        {/* <Text style={styles.header}>
           {`"${exterminatorInfo.companyName}"
           
           ${exterminatorInfo.name}
           `}
-        </Text>
+        </Text> */}
         <Text style={styles.title}>הנדון: אישור ביצוע הדברה</Text>
         <View style={styles.info}>
           <Text style={styles.subtitle}>:להלן פרטי הלקוח</Text>
@@ -154,8 +168,7 @@ function App() {
           <Text
             style={styles.text}
           >{`שם תכשיר ההדברה: ${productInfo.productName}
-          :שם החומר הפעיל
-          ${productInfo.activeMaterialName}
+           ${productInfo.activeMaterialName} :שם החומר הפעיל
           ריכוז החומר הפעיל: ${productInfo.activeMaterialLevel}
           ריכוז החומר הפעיל לאחר דילול: ${productInfo.activeMaterialDilution}
           שיטת ביצוע ההדברה: ${productInfo.applicationMethod}
@@ -266,6 +279,7 @@ function App() {
         );
         if (!res.ok) throw new Error("Could not get the data...");
         const data = await res.json();
+
         const justifyData = data.result.records[0]["חומרים פעילים"]
           .split(" ")
           .map((element) => {
@@ -277,7 +291,7 @@ function App() {
           });
         const dataToUse = justifyData.filter((el) => el !== null).sort();
         const activeNums = dataToUse
-          .map((el) => (/^(0|[1-9]\d*)$/.test(el) ? el : ""))
+          .map((el) => (/^(?:0|[1-9]\d*)(\.\d+)?$/.test(el) ? el : ""))
           .filter((el) => el !== "")
           .sort((a, b) => b - a)
           .join(", ");
