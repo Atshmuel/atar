@@ -160,14 +160,26 @@ function App() {
         </View>
         <View style={styles.info}>
           <Text style={styles.subtitle}>:פירוט דרכי הטיפול והחומרים</Text>
-          <Text
-            style={styles.text}
-          >{`שם תכשיר ההדברה: ${productInfo.productName}
+          <Text style={styles.text}>{`שם תכשיר ההדברה: ${
+            productInfo.productName
+          }
            ${productInfo.activeMaterialName} :שם החומר הפעיל
           ריכוז החומר הפעיל: ${productInfo.activeMaterialLevel}
           ריכוז החומר הפעיל לאחר דילול: ${productInfo.activeMaterialDilution}
           שיטת ביצוע ההדברה: ${productInfo.applicationMethod}
-          אזהרות שניתנו ללקוח בדבר הסיכונים הכרוכים בהדברה: ${productInfo.warnings}
+          :אזהרות שניתנו ללקוח בדבר הסיכונים הכרוכים בהדברה ${
+            insectsInfo.insectsType !== "מכרסמים"
+              ? `
+            *.כניסה לבית אחרי מינימום 3 שעות*
+            *.אין לאפשר לילדים לזחול ברצפה במשך 4 ימים*
+            *.אין לתת בעלי חיים להסתובב באזור שרוסס למשך 4 ימים*
+            `
+              : `
+             *.אין לפתוח את תיבות ההאכלה*
+             *.במידה והקופסה נפתחה מסיבה כלשהי אין לגעת בחומר ההדברה ויש לי צור קשר עם המדביר*
+             *.אין להזיז את התיבות האכלה משום סיבה שהיא*
+             `
+          }
           `}</Text>
         </View>
         <Text style={styles.emergancy}>
@@ -223,7 +235,6 @@ function App() {
 
   const [productInfo, setProductInfo] = useState({
     productName: "",
-    warnings: "",
     activeMaterialName: "",
     activeMaterialLevel: "",
     activeMaterialDilution: "",
@@ -248,7 +259,7 @@ function App() {
     setCustomerInfo({ ...customerInfo, address: e.target.value });
   }
   function handleIscType(e) {
-    setInsectsInfo({ ...insectsInfo, insectsType: e.target.value });
+    setInsectsInfo({ ...insectsInfo, insectsType: e });
   }
   function handleInfLevel(e) {
     setInsectsInfo({ ...insectsInfo, infectionLevel: e.target.value });
@@ -324,9 +335,7 @@ function App() {
         .join(", "),
     });
   }, [productInfo.activeMaterialName, productInfo.liters]);
-  function handleWarnings(e) {
-    setProductInfo({ ...productInfo, warnings: e.target.value });
-  }
+
   function handleMetName(e) {
     setProductInfo({ ...productInfo, activeMaterialName: e.target.value });
   }
@@ -340,7 +349,10 @@ function App() {
     setProductInfo({ ...productInfo, applicationMethod: e.target.value });
   }
   function handleLiters(e) {
-    setProductInfo({ ...productInfo, liters: e.target.value });
+    setProductInfo({
+      ...productInfo,
+      liters: +e.target.value === 0 ? 0.001 : +e.target.value,
+    });
   }
   function handleSignature(e) {
     e.preventDefault();
@@ -540,16 +552,24 @@ function App() {
         <>
           <Section>
             <MiniForm title="סוג המזיקים:">
-              <input
-                required
+              <select
                 className="px-1 border-2 font-thin text-sm w-44 xs:w-60 sm:w-10/12"
                 type="text"
                 name="insects-type"
                 onChange={(e) => {
-                  handleIscType(e);
+                  handleIscType(e.target.value);
                 }}
                 value={insectsInfo.insectsType}
-              />
+                required
+              >
+                <option value="" disabled hidden>
+                  נא לבחור
+                </option>
+                <option value="תיקנים ונמלים">תיקנים ונמלים</option>
+                <option value="מכרסמים">מכרסמים</option>
+                <option value="עקרבים ונדלים">עקרבים ונדלים</option>
+                <option value="כלל המזיקים">תיקנים,נמלים,עקרבים וכו'</option>
+              </select>
             </MiniForm>
             <MiniForm title="רמת הנגיעות:">
               <select
@@ -589,12 +609,15 @@ function App() {
               />
             </MiniForm>
           </Section>
-          <button
-            className="w-full border-2"
-            onClick={(e) => handleProceed(e, "insects")}
-          >
-            המשך
-          </button>
+          {insectsInfo.insectsType !== "" &&
+          insectsInfo.infectionLevel !== "" ? (
+            <button
+              className="w-full border-2"
+              onClick={(e) => handleProceed(e, "insects")}
+            >
+              המשך
+            </button>
+          ) : null}
         </>
       )}
 
@@ -677,16 +700,6 @@ function App() {
                   handleAppMethod(e);
                 }}
                 value={productInfo.applicationMethod}
-              />
-            </MiniForm>
-            <MiniForm title="אזהרות בדבר סיכונים כרוכים:">
-              <input
-                required
-                className="px-1 border-2 font-thin text-sm w-44 xs:w-60 sm:w-10/12"
-                type="text"
-                name="warnings"
-                onChange={(e) => handleWarnings(e)}
-                value={productInfo.warnings}
               />
             </MiniForm>
           </Section>
