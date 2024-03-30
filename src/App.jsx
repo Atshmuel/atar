@@ -1,5 +1,5 @@
 /* eslint-disable no-irregular-whitespace */
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import emailjs from "@emailjs/browser";
 import SignatureCanvas from "react-signature-canvas";
 import { v4 as uuidv4 } from "uuid";
@@ -479,14 +479,8 @@ function App() {
     }
   }
 
-  const form = useRef();
-
   return (
-    <form
-      className="p-2 my-0 mx-auto font-sans"
-      onSubmit={handleSubmit}
-      ref={form}
-    >
+    <form className="p-2 my-0 mx-auto font-sans" onSubmit={handleSubmit}>
       <input type="hidden" name="image_url" value={url} />
       {!customerInfo.fullFilled && (
         <>
