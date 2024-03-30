@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+/* eslint-disable no-irregular-whitespace */
+import { useEffect, useState, useRef } from "react";
+import emailjs from "@emailjs/browser";
 import SignatureCanvas from "react-signature-canvas";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -129,10 +131,10 @@ function App() {
         <Text style={{ fontFamily: "Rubik" }}></Text>
         <View style={styles.headerSection}>
           <Text>{exterminatorInfo.companyName}</Text>
-          <Text>{exterminatorInfo.name}</Text>
-          <Text>{exterminatorInfo.email}</Text>
+          <Text>{exterminatorInfo.atarName}</Text>
+          <Text>{exterminatorInfo.atarEmail}</Text>
           <Text>
-            {exterminatorInfo.phone} | {exterminatorInfo.tel}
+            {exterminatorInfo.atarPhone} | {exterminatorInfo.tel}
           </Text>
         </View>
         <Text style={styles.title}>הנדון: אישור ביצוע הדברה</Text>
@@ -146,6 +148,7 @@ function App() {
               : `לקוח ${customerInfo.job}`
           }
           מספר פלאפון: ${customerInfo.phone}
+          ${customerInfo.email} :אימייל
           מקום ביצוע העבודה: ${customerInfo.location}
           `}
           </Text>
@@ -160,26 +163,15 @@ function App() {
         </View>
         <View style={styles.info}>
           <Text style={styles.subtitle}>:פירוט דרכי הטיפול והחומרים</Text>
-          <Text style={styles.text}>{`שם תכשיר ההדברה: ${
-            productInfo.productName
-          }
+          <Text
+            style={styles.text}
+          >{`שם תכשיר ההדברה: ${productInfo.productName}
            ${productInfo.activeMaterialName} :שם החומר הפעיל
           ריכוז החומר הפעיל: ${productInfo.activeMaterialLevel}
           ריכוז החומר הפעיל לאחר דילול: ${productInfo.activeMaterialDilution}
           שיטת ביצוע ההדברה: ${productInfo.applicationMethod}
-          :אזהרות שניתנו ללקוח בדבר הסיכונים הכרוכים בהדברה ${
-            insectsInfo.insectsType !== "מכרסמים"
-              ? `
-            *.כניסה לבית אחרי מינימום 3 שעות*
-            *.אין לאפשר לילדים לזחול ברצפה במשך 4 ימים*
-            *.אין לתת בעלי חיים להסתובב באזור שרוסס למשך 4 ימים*
-            `
-              : `
-             *.אין לפתוח את תיבות ההאכלה*
-             *.במידה והקופסה נפתחה מסיבה כלשהי אין לגעת בחומר ההדברה ויש לי צור קשר עם המדביר*
-             *.אין להזיז את התיבות האכלה משום סיבה שהיא*
-             `
-          }
+          
+          :אזהרות שניתנו ללקוח בדבר הסיכונים הכרוכים בהדברה ${warnings}
           `}</Text>
         </View>
         <Text style={styles.emergancy}>
@@ -206,24 +198,66 @@ function App() {
   const [sign, setSign] = useState();
   const [url, setUrl] = useState();
   const [date, setDate] = useState("");
+  const [warnings, setWarnings] = useState("");
   const [time, setTime] = useState(getTime());
-  const [exterminatorInfo, setExterminatorInfo] = useState({
+  const customers = [
+    {
+      custName: "ביצי הר מירון שיווק",
+      custPhone: `054-6534633`,
+      custType: "לקוח עסקי",
+      custEmail: ``,
+      custLoc: `מפעל`,
+      custAddress: `כפר-חושן/ספסופה`,
+    },
+    {
+      custName: "בת-יער",
+      custPhone: "",
+      custType: "לקוח עסקי",
+      custEmail: ``,
+      custLoc: `פנים וחוץ`,
+      custAddress: `מצפה עמוקה, ד.נ. מרום גליל, 1380200`,
+    },
+    {
+      custName: "מכללת צפת",
+      custPhone: "050-7328567",
+      custType: "לקוח עסקי",
+      custEmail: ``,
+      custLoc: `מכללה פנים וחוץ`,
+      custAddress: `ירושלים 11, צפת, 1320611`,
+    },
+    {
+      custName: "המקומות הקדושים",
+      custPhone: "052-2855119",
+      custType: "לקוח עסקי",
+      custEmail: ``,
+      custLoc: `קברי צדיקים`,
+    },
+    {
+      custName: "מיטרוניקס",
+      custPhone: "052-6512579",
+      custType: "לקוח עסקי",
+      custEmail: `daniel.dayan@maytronics.com`,
+      custLoc: `מפעל`,
+      custAddress: `פארק תעשיות רמת דלתון, דלתון`,
+    },
+  ];
+  const exterminatorInfo = {
     companyName: "המבצע",
-    name: "בנימין עטר",
+    atarName: "בנימין עטר",
     licenseType: "מבנים ושטח פתוח",
     licenseNum: 676,
     tel: "04-6972481",
-    phone: "050-5439084",
-    email: "atarb@012.net.il",
-    fullFilled: false,
-  });
+    atarPhone: "050-5439084",
+    atarEmail: "atarb@012.net.il",
+  };
   const [customerInfo, setCustomerInfo] = useState({
     name: "",
     phone: "",
     job: "",
     location: "",
     address: "",
-    fullFilled: true,
+    email: "",
+    fullFilled: false,
   });
   const [insectsInfo, setInsectsInfo] = useState({
     insectsType: "",
@@ -237,14 +271,24 @@ function App() {
     productName: "",
     activeMaterialName: "",
     activeMaterialLevel: "",
-    activeMaterialDilution: "",
+    activeMaterialDilution: "0",
     applicationMethod: "",
     liters: "",
     fullFilled: true,
   });
 
   function handleName(e) {
-    setCustomerInfo({ ...customerInfo, name: e.target.value });
+    const customer = customers.find((cust) => cust.custName === e.target.value);
+
+    setCustomerInfo({
+      ...customerInfo,
+      name: e.target.value,
+      phone: customer?.custPhone ? customer?.custPhone : "",
+      email: customer?.custEmail ? customer?.custEmail : "",
+      job: customer?.custType ? customer?.custType : "",
+      location: customer?.custLoc ? customer?.custLoc : "",
+      address: customer?.custAddress ? customer?.custAddress : "",
+    });
   }
   function handlePhone(e) {
     setCustomerInfo({ ...customerInfo, phone: e.target.value });
@@ -257,6 +301,9 @@ function App() {
   }
   function handleAddress(e) {
     setCustomerInfo({ ...customerInfo, address: e.target.value });
+  }
+  function handleEmail(e) {
+    setCustomerInfo({ ...customerInfo, email: e.target.value });
   }
   function handleIscType(e) {
     setInsectsInfo({ ...insectsInfo, insectsType: e });
@@ -321,20 +368,21 @@ function App() {
   }, [productInfo.productName]);
 
   useEffect(() => {
-    if (!productInfo.activeMaterialName || !productInfo.liters) {
-      setProductInfo({ ...productInfo, activeMaterialDilution: "" });
-
+    if (!productInfo.activeMaterialName) {
       return;
     }
 
     setProductInfo({
       ...productInfo,
-      activeMaterialDilution: productInfo.activeMaterialLevel
-        .split(", ")
-        .map((el) => +((+el * 10) / +productInfo.liters / 10).toFixed(2))
-        .join(", "),
+      activeMaterialDilution:
+        productInfo.liters < 1
+          ? productInfo.activeMaterialLevel
+          : productInfo.activeMaterialLevel
+              .split(", ")
+              .map((el) => +((+el * 10) / +productInfo.liters / 10).toFixed(2))
+              .join(", "),
     });
-  }, [productInfo.activeMaterialName, productInfo.liters]);
+  }, [productInfo.activeMaterialName, productInfo.liters, productInfo]);
 
   function handleMetName(e) {
     setProductInfo({ ...productInfo, activeMaterialName: e.target.value });
@@ -351,7 +399,7 @@ function App() {
   function handleLiters(e) {
     setProductInfo({
       ...productInfo,
-      liters: +e.target.value === 0 ? 0.001 : +e.target.value,
+      liters: +e.target.value,
     });
   }
   function handleSignature(e) {
@@ -364,18 +412,56 @@ function App() {
     sign.clear();
     setUrl("");
   }
+
   function handleSubmit(e) {
     e.preventDefault();
+  }
+
+  useEffect(() => {
+    setWarnings(
+      insectsInfo.insectsType !== "מכרסמים"
+        ? `
+   *.כניסה לבית אחרי מינימום 3 שעות*
+   *.אין לאפשר לילדים לזחול ברצפה במשך 4 ימים*
+   *.אין לתת בעלי חיים להסתובב באזור שרוסס למשך 4 ימים*
+`
+        : `
+  *.אין לפתוח את תיבות ההאכלה*
+  *.במידה והקופסה נפתחה מסיבה כלשהי אין לגעת בחומר ההדברה ויש ליצור קשר עם המדביר*
+  *.אין להזיז את התיבות האכלה משום סיבה שהיא*
+`
+    );
+  }, [insectsInfo.insectsType]);
+
+  function handleSendEmail(e) {
+    e.preventDefault();
+    const data = {
+      date,
+      time,
+      warnings,
+      ...exterminatorInfo,
+      ...customerInfo,
+      ...insectsInfo,
+      ...productInfo,
+    };
+
+    emailjs
+      .send("service_79jcv5o", "template_z4bqghh", data, "8Y_vlfaDQ5FXMqt_8")
+      .then(
+        (result) => {
+          alert("נשלח בהצלחה, לא לשכוח ללחוץ על כפתור ההורדה");
+        },
+        (error) => {
+          alert(
+            "לא הצלחנו לשלוח את הטופס ללקוח, לא לשכוח ללחוץ על כפתור ההורדה!"
+          );
+        }
+      );
   }
   function handleProceed(e, from) {
     e.preventDefault();
 
     switch (from) {
-      case "exterminator":
-        setExterminatorInfo({ ...exterminatorInfo, fullFilled: true });
-        setCustomerInfo({ ...customerInfo, fullFilled: false });
-        break;
-
       case "customer":
         setCustomerInfo({ ...customerInfo, fullFilled: true });
         setInsectsInfo({ ...insectsInfo, fullFilled: false });
@@ -393,80 +479,21 @@ function App() {
     }
   }
 
+  const form = useRef();
+
   return (
-    <form className="p-2 my-0 mx-auto font-sans" onSubmit={handleSubmit}>
+    <form
+      className="p-2 my-0 mx-auto font-sans"
+      onSubmit={handleSubmit}
+      ref={form}
+    >
       <input type="hidden" name="image_url" value={url} />
-      {!exterminatorInfo.fullFilled && (
-        <>
-          <Section>
-            <MiniForm title="שם המדביר:">
-              <input
-                required
-                className="px-1 border-2 font-thin text-sm w-44 xs:w-60 sm:w-10/12"
-                type="text"
-                disabled
-                value={exterminatorInfo.name}
-              />
-            </MiniForm>
-            <MiniForm title="סוג רישיון:">
-              <input
-                required
-                className="px-1 border-2 font-thin text-sm w-44 xs:w-60 sm:w-10/12"
-                type="text"
-                disabled
-                value={exterminatorInfo.licenseType}
-              />
-            </MiniForm>
-            <MiniForm title="מספר רישיון:">
-              <input
-                required
-                className="px-1 border-2 font-thin text-sm w-44 xs:w-60 sm:w-10/12"
-                type="number"
-                disabled
-                value={exterminatorInfo.licenseNum}
-              />
-            </MiniForm>
-            <MiniForm title="מספר טלפון:">
-              <input
-                required
-                className="px-1 border-2 font-thin text-sm w-44 xs:w-60 sm:w-10/12"
-                type="text"
-                disabled
-                value={exterminatorInfo.tel}
-              />
-            </MiniForm>
-            <MiniForm title="מספר נייד:">
-              <input
-                required
-                className="px-1 border-2 font-thin text-sm w-44 xs:w-60 sm:w-10/12"
-                type="text"
-                disabled
-                value={exterminatorInfo.phone}
-              />
-            </MiniForm>
-            <MiniForm title="אימייל:">
-              <input
-                required
-                className="px-1 border-2 font-thin text-sm w-44 xs:w-60 sm:w-10/12"
-                type="email"
-                disabled
-                value={exterminatorInfo.email}
-              />
-            </MiniForm>
-          </Section>
-          <button
-            className="w-full border-2"
-            onClick={(e) => handleProceed(e, "exterminator")}
-          >
-            המשך
-          </button>
-        </>
-      )}
       {!customerInfo.fullFilled && (
         <>
           <Section>
             <MiniForm title="שם המזמין:">
               <input
+                list="customers-list"
                 required
                 className="px-1 border-2 font-thin text-sm w-44 xs:w-60 sm:w-10/12"
                 type="text"
@@ -475,6 +502,11 @@ function App() {
                 onChange={(e) => handleName(e)}
                 value={customerInfo.name}
               />
+              <datalist id="customers-list">
+                {customers.map((customer) => (
+                  <option key={customer.custName}>{customer.custName}</option>
+                ))}
+              </datalist>
             </MiniForm>
             <MiniForm title="מספר פלאפון:">
               <input
@@ -517,6 +549,16 @@ function App() {
                 placeholder="הנשיא 33, צפת"
                 onChange={(e) => handleAddress(e)}
                 value={customerInfo.address}
+              />
+            </MiniForm>
+            <MiniForm title="אימייל:">
+              <input
+                required
+                className="px-1 border-2 font-thin text-sm w-44 xs:w-60 sm:w-10/12"
+                type="text"
+                name="email"
+                onChange={(e) => handleEmail(e)}
+                value={customerInfo.email}
               />
             </MiniForm>
             <MiniForm title="תאריך ביצוע:">
@@ -722,8 +764,11 @@ function App() {
                 נסה שוב
               </button>
               <button
+                type="submit"
                 className="px-2 py-1 rounded-md border-2 border-slate-200 bg-slate-200 hover:bg-slate-300 transition-colors duration-200 hover:scale-105"
-                onClick={handleSignature}
+                onClick={(e) => {
+                  handleSignature(e), handleSendEmail(e);
+                }}
               >
                 אשר חתימה
               </button>
