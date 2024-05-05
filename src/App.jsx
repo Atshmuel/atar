@@ -240,6 +240,14 @@ function App() {
       custLoc: `מפעל`,
       custAddress: `פארק תעשיות רמת דלתון, דלתון`,
     },
+    {
+      custName: 'מ.ל.א. גידול ושיווק בצים בע"מ',
+      custPhone: "052-6512579",
+      custType: "לקוח עסקי",
+      custEmail: `0522812028m@gmail.com`,
+      custLoc: `מפעל`,
+      custAddress: `דלתון 15, דלתון`,
+    },
   ];
   const exterminatorInfo = {
     companyName: "המבצע",
