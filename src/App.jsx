@@ -142,11 +142,10 @@ function App() {
           <Text style={styles.subtitle}>:להלן פרטי הלקוח</Text>
           <Text style={styles.text}>
             {`שם הלקוח: ${customerInfo.name}
-          סוג הלקוח: ${
-            customerInfo.job.includes("לקוח")
-              ? customerInfo.job
-              : `לקוח ${customerInfo.job}`
-          }
+          סוג הלקוח: ${customerInfo.job.includes("לקוח")
+                ? customerInfo.job
+                : `לקוח ${customerInfo.job}`
+              }
           מספר פלאפון: ${customerInfo.phone}
           ${customerInfo.email} :אימייל
           מקום ביצוע העבודה: ${customerInfo.location}
@@ -201,11 +200,12 @@ function App() {
   const [warnings, setWarnings] = useState("");
   const [time, setTime] = useState(getTime());
   const customers = [
+
     {
       custName: "ביצי הר מירון שיווק",
       custPhone: `054-6534633`,
       custType: "לקוח עסקי",
-      custEmail: ``,
+      custEmail: `bizy@netvision.net.il`,
       custLoc: `מפעל`,
       custAddress: `כפר-חושן/ספסופה`,
     },
@@ -221,7 +221,7 @@ function App() {
       custName: "מכללת צפת",
       custPhone: "050-7328567",
       custType: "לקוח עסקי",
-      custEmail: ``,
+      custEmail: `nahumh@zefat.ac.il`,
       custLoc: `מכללה פנים וחוץ`,
       custAddress: `ירושלים 11, צפת, 1320611`,
     },
@@ -229,7 +229,7 @@ function App() {
       custName: "המקומות הקדושים",
       custPhone: "052-2855119",
       custType: "לקוח עסקי",
-      custEmail: ``,
+      custEmail: `israeld@holy.org.il`,
       custLoc: `קברי צדיקים`,
     },
     {
@@ -347,8 +347,8 @@ function App() {
             return /^[A-Za-z]+$/.test(element)
               ? element
               : element.includes("%")
-              ? +element.split("%")[0]
-              : null;
+                ? +element.split("%")[0]
+                : null;
           });
         const dataToUse = justifyData.filter((el) => el !== null).sort();
         const activeNums = dataToUse
@@ -386,9 +386,9 @@ function App() {
         productInfo.liters < 1
           ? productInfo.activeMaterialLevel
           : productInfo.activeMaterialLevel
-              .split(", ")
-              .map((el) => +((+el * 10) / +productInfo.liters / 10).toFixed(2))
-              .join(", "),
+            .split(", ")
+            .map((el) => +((+el * 10) / +productInfo.liters / 10).toFixed(2))
+            .join(", "),
     });
   }, [productInfo.activeMaterialName, productInfo.liters, productInfo]);
 
@@ -654,7 +654,7 @@ function App() {
             </MiniForm>
           </Section>
           {insectsInfo.insectsType !== "" &&
-          insectsInfo.infectionLevel !== "" ? (
+            insectsInfo.infectionLevel !== "" ? (
             <button
               className="w-full border-2"
               onClick={(e) => handleProceed(e, "insects")}
